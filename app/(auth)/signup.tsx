@@ -1,13 +1,12 @@
+// app/(auth)/signup.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { auth, db } from '../../config/firebaseConfig'; // Adjust path if firebaseConfig is elsewhere
 import { UserProfile } from '../../types/user';   // Adjust path to your types
 import { useRouter } from 'expo-router';
-// Using expo-checkbox
 import Checkbox from 'expo-checkbox';
-
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -17,7 +16,7 @@ export default function SignUpScreen() {
   const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [agreedToTerms, setAgreedToTerms] = useState(false); // For the checkbox
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
@@ -46,9 +45,10 @@ export default function SignUpScreen() {
         fullName,
         contactNo,
         address,
-        agreedToTerms, // Storing the checkbox state
+        agreedToTerms,
         status: 'pending_approval',
         createdAt: serverTimestamp() as Timestamp,
+        role: 'user', // Default role for new users
       };
       await setDoc(userDocRef, newUserProfile);
 
@@ -56,7 +56,7 @@ export default function SignUpScreen() {
         'Signup Successful',
         'Your account has been created and is pending administrator approval. Please try logging in later.'
       );
-      router.replace('/login'); // Navigate to login after successful signup
+      router.replace('/(auth)/login'); // Navigate to login after successful signup
 
     } catch (error: any) {
       let errorMessage = 'Failed to create account. Please try again.';
@@ -72,12 +72,11 @@ export default function SignUpScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }; // Ensure this is the ONLY handleSignUp function
 
   return (
     <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
-      {/* The title "Create your account" is now handled by the Stack Navigator header */}
-      
+      {/* Your JSX for input fields and button remains the same */}
       <Text style={styles.label}>Full Name</Text>
       <TextInput
         style={styles.input}
@@ -86,64 +85,24 @@ export default function SignUpScreen() {
         value={fullName}
         onChangeText={setFullName}
       />
-
+      {/* ... other TextInput fields for email, contactNo, address, password, confirmPassword ... */}
       <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#888"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-
+      <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#888" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
       <Text style={styles.label}>Contact No.</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Contact No."
-        placeholderTextColor="#888"
-        value={contactNo}
-        onChangeText={setContactNo}
-        keyboardType="phone-pad"
-      />
-
+      <TextInput style={styles.input} placeholder="Contact No." placeholderTextColor="#888" value={contactNo} onChangeText={setContactNo} keyboardType="phone-pad" />
       <Text style={styles.label}>Address</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Address"
-        placeholderTextColor="#888"
-        value={address}
-        onChangeText={setAddress}
-        multiline
-      />
-
+      <TextInput style={styles.input} placeholder="Address" placeholderTextColor="#888" value={address} onChangeText={setAddress} multiline />
       <Text style={styles.label}>Password</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#888"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
+      <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#888" value={password} onChangeText={setPassword} secureTextEntry />
       <Text style={styles.label}>Confirm Password</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        placeholderTextColor="#888"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
+      <TextInput style={styles.input} placeholder="Confirm Password" placeholderTextColor="#888" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
 
       <View style={styles.checkboxContainer}>
         <Checkbox
           style={styles.checkbox}
           value={agreedToTerms}
           onValueChange={setAgreedToTerms}
-          color={agreedToTerms ? '#007AFF' : undefined} // Blue color when checked
+          color={agreedToTerms ? '#007AFF' : undefined}
         />
         <Text style={styles.checkboxLabel}>
           I confirm my information is accurate and I acknowledge the ID verification requirement (simulated).
@@ -161,67 +120,17 @@ export default function SignUpScreen() {
   );
 }
 
+// Your styles (StyleSheet.create({ ... })) remain the same
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: '#1A1A1A', // Dark background
-  },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 25,
-  },
-  label: {
-    fontSize: 14,
-    color: '#FFFFFF', // Light text for labels
-    marginBottom: 5,
-    marginTop: 10,
-  },
-  input: {
-    backgroundColor: '#2C2C2E', // Slightly lighter dark input background
-    color: '#FFFFFF', // Light text color for input
-    paddingHorizontal: 15,
-    paddingVertical: Platform.OS === 'ios' ? 15 : 10, // Adjust padding for platform
-    borderRadius: 8,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#3A3A3C', // Subtle border for inputs
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    marginVertical: 20,
-    alignItems: 'center',
-  },
-  checkbox: {
-    marginRight: 10,
-    // Expo checkbox is harder to style extensively (size, border on iOS)
-    // For more custom styling, a custom component might be needed
-    borderColor: '#007AFF', // Blue border for checkbox
-    borderWidth: 1,
-    borderRadius: 3,
-    width: 20, // Adjust size as needed
-    height: 20, // Adjust size as needed
-  },
-  checkboxLabel: {
-    fontSize: 14,
-    color: '#E5E5EA', // Lighter text for checkbox label
-    flexShrink: 1, // Allow text to wrap
-  },
-  button: {
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10, // Spacing from the checkbox
-    width: '100%',
-  },
-  registerButton: {
-    backgroundColor: '#007AFF', // Blue button color
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
+  scrollView: { backgroundColor: '#1A1A1A', },
+  container: { flexGrow: 1, justifyContent: 'center', padding: 25, },
+  label: { fontSize: 14, color: '#FFFFFF', marginBottom: 5, marginTop: 10, },
+  input: { backgroundColor: '#2C2C2E', color: '#FFFFFF', paddingHorizontal: 15, paddingVertical: Platform.OS === 'ios' ? 15 : 10, borderRadius: 8, fontSize: 16, borderWidth: 1, borderColor: '#3A3A3C', },
+  checkboxContainer: { flexDirection: 'row', marginVertical: 20, alignItems: 'center', },
+  checkbox: { marginRight: 10, borderColor: '#007AFF', borderWidth: 1, borderRadius: 3, width: 20, height: 20, },
+  checkboxLabel: { fontSize: 14, color: '#E5E5EA', flexShrink: 1, },
+  button: { paddingVertical: 15, borderRadius: 8, alignItems: 'center', marginTop: 10, width: '100%', },
+  registerButton: { backgroundColor: '#007AFF', },
+  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold', },
+  buttonDisabled: { opacity: 0.5, },
 });

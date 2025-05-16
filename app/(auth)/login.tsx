@@ -112,8 +112,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   input: {
-    backgroundColor: '#2C2C2E',
-    color: '#FFFFFF',
+    backgroundColor: '#F0F2F5',
+    color: '#000000FF',
     paddingHorizontal: 15,
     paddingVertical: Platform.OS === 'ios' ? 15 : 10,
     borderRadius: 8,
